@@ -31,8 +31,9 @@ const (
 )
 
 type auditLog struct {
-	CGroupID      uint64
+	//CGroupID uint64
 	PID           uint32
+	UID           uint32
 	Ret           int32
 	Nodename      [NEW_UTS_LEN + 1]byte
 	Command       [TASK_COMM_LEN]byte
@@ -115,9 +116,11 @@ func RunAudit(ctx context.Context, wg *sync.WaitGroup, conf *config.Config) erro
 
 func newAuditLog(event auditLog) log.RestrictedFileAccessLog {
 	auditEvent := log.AuditEventLog{
-		Action:     retToaction(event.Ret),
-		Hostname:   helpers.NodenameToString(event.Nodename),
-		PID:        event.PID,
+		Action:   retToaction(event.Ret),
+		Hostname: helpers.NodenameToString(event.Nodename),
+		PID:      event.PID,
+		UID:      event.UID,
+		//GID:        event.GID,
 		Comm:       helpers.CommToString(event.Command),
 		ParentComm: helpers.CommToString(event.ParentCommand),
 	}

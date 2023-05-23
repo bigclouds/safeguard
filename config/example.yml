@@ -20,7 +20,8 @@ files:
   #allow:
     #- '/'
   deny:
-    - '/etc/passwd'
+    - '/etc/profile'
+    #- '/etc/passwd'
 log:
   format: json
 
