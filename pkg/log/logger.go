@@ -2,6 +2,8 @@ package logger
 
 import (
 	"os"
+	"os/user"
+	"strconv"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -114,6 +116,7 @@ type AuditEventLog struct {
 	Action     string
 	Hostname   string
 	PID        uint32
+	UID        uint32
 	Comm       string
 	ParentComm string
 }
@@ -152,9 +155,18 @@ func (l *RestrictedNetworkLog) Info() {
 
 func (l *RestrictedFileAccessLog) Info() {
 	Logger.WithFields(logrus.Fields{
-		"Action":     l.Action,
-		"Hostname":   l.Hostname,
-		"PID":        l.PID,
+		"Action":   l.Action,
+		"Hostname": l.Hostname,
+		"PID":      l.PID,
+		"UID":      l.UID,
+		"UName": func(UID uint32) string {
+			u, err := user.LookupId(strconv.FormatUint(uint64(UID), 10))
+			if err != nil {
+				return "Nan"
+			} else {
+				return u.Username
+			}
+		}(l.UID),
 		"Comm":       l.Comm,
 		"ParentComm": l.ParentComm,
 		"Path":       l.Path,

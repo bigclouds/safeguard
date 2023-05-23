@@ -21,14 +21,16 @@ struct callback_ctx {
 };
 
 struct file_open_audit_event {
-    u64 cgroup;
+    //u64 cgroup;
     u32 pid;
+    u32 uid;
+    //u32 gid;
     int ret;
     char nodename[NEW_UTS_LEN + 1];
     char task[TASK_COMM_LEN];
     char parent_task[TASK_COMM_LEN];
     unsigned char path[NAME_MAX];
-};
+}; //512 stack size restrict, now [479 - 64(cgroup) + 32(uid)] + other_stack
 
 struct fileopen_bouheki_config {
     u32 mode;
@@ -78,11 +80,14 @@ int BPF_PROG(restricted_file_open, struct file *file)
     BPF_CORE_READ_INTO(&event.nodename, uts_ns, name.nodename);
     BPF_CORE_READ_INTO(&mnt_ns, nsproxy, mnt_ns);
     BPF_CORE_READ_INTO(&inum, mnt_ns, ns.inum);
-    event.cgroup = bpf_get_current_cgroup_id();
+    //event.cgroup = bpf_get_current_cgroup_id();
     event.pid = (u32)(bpf_get_current_pid_tgid() >> 32);
     bpf_get_current_comm(&event.task, sizeof(event.task));
     struct task_struct *parent_task = BPF_CORE_READ(current_task, real_parent);
     bpf_probe_read_kernel_str(&event.parent_task, sizeof(event.parent_task), &parent_task->comm);
+    u64 uid_gid = bpf_get_current_uid_gid();
+    event.uid = uid_gid & 0xFFFFFFFF;
+    //event.gid = uid_gid >> 32;
 
     if (bpf_d_path(&file->f_path, event.path, NAME_MAX) < 0) {
         return 0;
