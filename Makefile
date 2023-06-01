@@ -39,12 +39,15 @@ bpf-restricted-file: $(BPF_BUILDDIR)/restricted-file.bpf.o
 .PHONY: bpf-restricted-mount
 bpf-restricted-mount: $(BPF_BUILDDIR)/restricted-mount.bpf.o
 
+.PHONY: bpf-restricted-process
+bpf-restricted-process: $(BPF_BUILDDIR)/restricted-process.bpf.o
+
 .PHONY: vmlinux
 vmlinux:
 	$(shell bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h)
 
 .PHONY: build
-build: bpf-restricted-network bpf-restricted-file bpf-restricted-mount
+build: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process
 	mkdir -p build
 	$(CGOFLAG) go build -tags netgo -ldflags '-w -s -extldflags "-static"' -o build/cu-observer cmd/cuob/cu-observer.go
 
@@ -54,17 +57,17 @@ build/docker:
 	sudo docker build -t ghcr.io/mrtc0/bouheki:latest .
 
 .PHONY: test/unit
-test/unit: bpf-restricted-network bpf-restricted-file bpf-restricted-mount
+test/unit: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process
 	which gotestsum || go install gotest.tools/gotestsum@latest
 	$(CGOFLAG) sudo -E gotestsum -- --mod=vendor -bench=^$$ -race ./...
 
 .PHONY: test
-test: bpf-restricted-network bpf-restricted-file bpf-restricted-mount
+test: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process
 	which gotestsum || go install gotest.tools/gotestsum@latest
 	$(CGOFLAG) sudo -E gotestsum -- --tags=integration --mod=vendor -bench=^$$ -race ./...
 
 .PHONY: test/integration/specify
-test/integration/specify: bpf-restricted-network bpf-restricted-file bpf-restricted-mount
+test/integration/specify: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process
 	which gotestsum || go install gotest.tools/gotestsum@latest
 	$(CGOFLAG) sudo -E go test -tags integration -run ${NAME} ./...
 

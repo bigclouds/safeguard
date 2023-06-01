@@ -33,6 +33,14 @@ type RestrictedMountConfig struct {
 	DenySourcePath []string `yaml:"deny"`
 }
 
+type RestrictedProcessConfig struct {
+	Enable bool
+	Mode   string `yaml:"mode"`
+	Target string `yaml:"target"`
+	// Allow  []string `yaml:"allow"`
+	// Deny   []string `yaml:"deny"`
+}
+
 type DomainConfig struct {
 	Allow    []string `yaml:"allow"`
 	Deny     []string `yaml:"deny"`
@@ -78,6 +86,7 @@ type Config struct {
 	RestrictedNetworkConfig    `yaml:"network"`
 	RestrictedFileAccessConfig `yaml:"files"`
 	RestrictedMountConfig      `yaml:"mount"`
+	RestrictedProcessConfig    `yaml:"process"`
 	DNSProxyConfig             `yaml:"dns_proxy"`
 	Log                        LogConfig
 }
@@ -106,6 +115,13 @@ func DefaultConfig() *Config {
 			Mode:           "monitor",
 			Target:         "host",
 			DenySourcePath: []string{},
+		},
+		RestrictedProcessConfig: RestrictedProcessConfig{
+			Enable: true,
+			Mode:   "monitor",
+			Target: "host",
+			// Allow:  []string{"/"},
+			// Deny:   []string{},
 		},
 		DNSProxyConfig: DNSProxyConfig{
 			Enable:        false,
@@ -175,6 +191,12 @@ func (c *Config) IsRestrictedMode(target string) bool {
 		} else {
 			return false
 		}
+	case "process":
+		if c.RestrictedMountConfig.Mode == "block" {
+			return true
+		} else {
+			return false
+		}
 	default:
 		return false
 	}
@@ -195,6 +217,12 @@ func (c *Config) IsOnlyContainer(target string) bool {
 			return false
 		}
 	case "mount":
+		if c.RestrictedMountConfig.Target == "container" {
+			return true
+		} else {
+			return false
+		}
+	case "process":
 		if c.RestrictedMountConfig.Target == "container" {
 			return true
 		} else {

@@ -1,4 +1,4 @@
-package fileaccess
+package process
 
 import (
 	"C"
@@ -20,29 +20,27 @@ import (
 )
 
 const (
-	BPF_OBJECT_NAME        = "restricted-file"
-	BPF_PROGRAM_NAME       = "restricted_file_open"
-	ALLOWED_FILES_MAP_NAME = "allowed_access_files"
-	DENIED_FILES_MAP_NAME  = "denied_access_files"
+	BPF_OBJECT_NAME  = "restricted-process"
+	BPF_PROGRAM_NAME = "restricted_process_fork"
+	// ALLOWED_FILES_MAP_NAME = "allowed_access_files"
+	// DENIED_FILES_MAP_NAME  = "denied_access_files"
 
-	NEW_UTS_LEN   = 64
-	PATH_MAX      = 255
-	TASK_COMM_LEN = 16
+	NEW_UTS_LEN      = 64
+	PATH_MAX         = 255
+	PROCESS_COMM_LEN = 16
 )
 
 type auditLog struct {
 	//CGroupID uint64
 	PID           uint32
-	UID           uint32
-	Ret           int32
+	PPID          uint32
 	Nodename      [NEW_UTS_LEN + 1]byte
-	Command       [TASK_COMM_LEN]byte
-	ParentCommand [TASK_COMM_LEN]byte
-	Path          [PATH_MAX]byte
+	Command       [PROCESS_COMM_LEN]byte
+	ParentCommand [PROCESS_COMM_LEN]byte
 }
 
 func setupBPFProgram() (*libbpfgo.Module, error) {
-	bytecode, err := bpf.EmbedFS.ReadFile("bytecode/restricted-file.bpf.o")
+	bytecode, err := bpf.EmbedFS.ReadFile("bytecode/restricted-process.bpf.o")
 	if err != nil {
 		return nil, err
 	}
@@ -59,11 +57,11 @@ func setupBPFProgram() (*libbpfgo.Module, error) {
 }
 
 func RunAudit(ctx context.Context, wg *sync.WaitGroup, conf *config.Config) error {
-	log.Info("Launching the fileaccess audit...")
+	log.Info("Launching the process audit...")
 	defer wg.Done()
 
-	if !conf.RestrictedFileAccessConfig.Enable {
-		log.Info("fileaccess audit is disable. shutdown...")
+	if !conf.RestrictedProcessConfig.Enable {
+		log.Info("process audit is disable. shutdown...")
 		return nil
 	}
 
@@ -85,7 +83,7 @@ func RunAudit(ctx context.Context, wg *sync.WaitGroup, conf *config.Config) erro
 
 	mgr.Attach()
 
-	log.Info("Start the fileaccess audit.")
+	log.Info("Start the process audit.")
 	eventChannel := make(chan []byte)
 	lostChannel := make(chan uint64)
 	mgr.Start(eventChannel, lostChannel)
@@ -109,33 +107,33 @@ func RunAudit(ctx context.Context, wg *sync.WaitGroup, conf *config.Config) erro
 
 	<-ctx.Done()
 	mgr.Close()
-	log.Info("Terminated the fileaccess audit.")
+	log.Info("Terminated the process audit.")
 
 	return nil
 }
 
-func newAuditLog(event auditLog) log.RestrictedFileAccessLog {
+func newAuditLog(event auditLog) log.RestrictedProcessLog {
 	auditEvent := log.AuditEventLog{
-		Action:     retToaction(event.Ret),
+		//Action:     retToaction(event.Ret),
 		Hostname:   helpers.NodenameToString(event.Nodename),
 		PID:        event.PID,
-		UID:        event.UID,
 		Comm:       helpers.CommToString(event.Command),
 		ParentComm: helpers.CommToString(event.ParentCommand),
 	}
 
-	fileAccessLog := log.RestrictedFileAccessLog{
+	processAccessLog := log.RestrictedProcessLog{
 		AuditEventLog: auditEvent,
-		Path:          pathToString(event.Path),
+		PPID:          event.PPID,
 	}
 
-	return fileAccessLog
+	return processAccessLog
 }
 
 func parseEvent(eventBytes []byte) (auditLog, error) {
 	buf := bytes.NewBuffer(eventBytes)
 	var event auditLog
 	err := binary.Read(buf, binary.LittleEndian, &event)
+
 	if err != nil {
 		return auditLog{}, err
 	}
@@ -143,22 +141,10 @@ func parseEvent(eventBytes []byte) (auditLog, error) {
 	return event, nil
 }
 
-func retToaction(ret int32) string {
-	if ret == 0 {
-		return "ALLOWED"
-	} else {
-		return "BLOCKED"
-	}
-}
-
-func pathToString(path [PATH_MAX]byte) string {
-	var s string
-	for _, b := range path {
-		if b != 0x00 {
-			s += string(b)
-		} else {
-			break
-		}
-	}
-	return s
-}
+// func retToaction(ret int32) string {
+// 	if ret == 0 {
+// 		return "ALLOWED"
+// 	} else {
+// 		return "BLOCKED"
+// 	}
+// }
