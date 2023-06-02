@@ -10,6 +10,7 @@ import (
 	"culinux/pkg/audit/fileaccess"
 	"culinux/pkg/audit/mount"
 	"culinux/pkg/audit/network"
+	"culinux/pkg/audit/process"
 	"culinux/pkg/config"
 	log "culinux/pkg/log"
 	"culinux/pkg/utils"
@@ -20,15 +21,15 @@ import (
 var (
 	configFlag = cli.StringFlag{
 		Name:    "config",
-		Value:   "bouheki.yaml",
+		Value:   "cu_observer.yaml",
 		Usage:   "config file path",
-		EnvVars: []string{"BOUHEKI_CONFIG_PATH"},
+		EnvVars: []string{"CUOB_CONFIG_PATH"},
 	}
 )
 
 func NewApp(version string) *cli.App {
 	app := cli.NewApp()
-	app.Name = "bouheki"
+	app.Name = "CU-Observer"
 	app.Version = "0.0.10"
 	app.Usage = "..."
 
@@ -57,10 +58,11 @@ func NewApp(version string) *cli.App {
 		defer cancel()
 
 		var wg sync.WaitGroup
-		wg.Add(3)
+		wg.Add(4)
 
 		go fileaccess.RunAudit(ctx, &wg, conf)
 		go network.RunAudit(ctx, &wg, conf)
+		go process.RunAudit(ctx, &wg, conf)
 		go mount.RunAudit(ctx, &wg, conf)
 
 		wg.Wait()

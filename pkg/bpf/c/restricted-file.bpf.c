@@ -24,7 +24,6 @@ struct file_open_audit_event {
     //u64 cgroup;
     u32 pid;
     u32 uid;
-    //u32 gid;
     int ret;
     char nodename[NEW_UTS_LEN + 1];
     char task[TASK_COMM_LEN];

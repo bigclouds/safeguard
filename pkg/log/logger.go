@@ -20,7 +20,7 @@ func init() {
 }
 
 func NewLogger() *log.Entry {
-	return log.WithFields(log.Fields{"bouheki_pid": os.Getpid()})
+	return log.WithFields(log.Fields{"cu_observer_pid": os.Getpid()})
 }
 
 func logLevel(level string) string {
@@ -139,6 +139,11 @@ type RestrictedMountLog struct {
 	SourcePath string
 }
 
+type RestrictedProcessLog struct {
+	AuditEventLog
+	PPID uint32
+}
+
 func (l *RestrictedNetworkLog) Info() {
 	Logger.WithFields(logrus.Fields{
 		"Action":     l.Action,
@@ -182,4 +187,15 @@ func (l *RestrictedMountLog) Info() {
 		"ParentComm": l.ParentComm,
 		"SourcePath": l.SourcePath,
 	}).Info("Mount event is trapped in th filter.")
+}
+
+func (l *RestrictedProcessLog) Info() {
+	Logger.WithFields(logrus.Fields{
+		//"Action":   l.Action,
+		"Hostname":   l.Hostname,
+		"PID":        l.PID,
+		"PPID":       l.PPID,
+		"Comm":       l.Comm,
+		"ParentComm": l.ParentComm,
+	}).Info("Process event is trapped in th filter.")
 }

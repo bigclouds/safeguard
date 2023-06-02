@@ -1,5 +1,5 @@
-# example.yml
 network:
+  enable: false
   mode: block
   target: host
   cidr:
@@ -23,9 +23,14 @@ files:
   deny:
     - '/etc/profile'
     #- '/etc/passwd'
+mount:
+  enable: false
 process:
   enable: true
+  mode: monitor
+  target: host
 
 log:
+  level: debug
   format: json
 
