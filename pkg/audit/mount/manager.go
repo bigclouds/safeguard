@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	MOUNT_CONFIG             = "mount_bouheki_config_map"
+	MOUNT_CONFIG             = "mount_safeguard_config_map"
 	MOUNT_DENIED_SOURCE_LIST = "mount_denied_source_list"
 	MODE_MONITOR             = uint32(0)
 	MODE_BLOCK               = uint32(1)

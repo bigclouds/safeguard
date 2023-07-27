@@ -54,7 +54,7 @@ int BPF_PROG(restricted_process_fork) {
     struct task_struct *current_task;
     struct uts_namespace *uts_ns;
     struct nsproxy *nsproxy;
-    //struct fileopen_bouheki_config *config = (struct fileopen_bouheki_config *)bpf_map_lookup_elem(&process_config_map, &index);
+    //struct fileopen_safeguard_config *config = (struct fileopen_safeguard_config *)bpf_map_lookup_elem(&process_config_map, &index);
 
     current_task = (struct task_struct *)bpf_get_current_task();
 

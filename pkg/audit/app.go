@@ -29,7 +29,7 @@ var (
 
 func NewApp(version string) *cli.App {
 	app := cli.NewApp()
-	app.Name = "CU-Observer"
+	app.Name = "safeguard"
 	app.Version = "0.0.10"
 	app.Usage = "..."
 
@@ -70,7 +70,7 @@ func NewApp(version string) *cli.App {
 		return nil
 	}
 
-	if os.Getenv("BOUHEKI_SKIP_COMPATIBLE_CHECK") == "" {
+	if os.Getenv("SKIP_COMPATIBLE_CHECK") == "" {
 		err := utils.IsCompatible()
 		if err != nil {
 			log.Error(err)

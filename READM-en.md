@@ -1,6 +1,6 @@
-# CU-Observer: KRSI(eBPF+LSM) based Linux security auditing tool
+# safeguard: KRSI(eBPF+LSM) based Linux security auditing tool
 
-CU-Observer is a Linux audit and observer tool based on eBPF.
+safeguard is a Linux audit and observer tool based on eBPF.
 Security events can be audited and blocked based on the container of the process, and restrictions can be applied to container environments.
 
 # Features
@@ -14,19 +14,19 @@ Security events can be audited and blocked based on the container of the process
 # Build
 
 ```shell
-$ git clone --recursive https://git.culinux.net/CULinux/CU-Observer.git && cd CU-Observer
+$ git clone --recursive https://git.culinux.net/CULinux/safeguard.git && cd safeguard
 # $ vagrant up && vagrant reload
 # $ vagrant ssh
 
 $ make libbpf-static
 $ make build
 
-sudo ./build/cu-observer --config config/cu_observer.yml |grep BLOCK
+sudo ./build/safeguard --config config/safeguard.yml #|grep BLOCK
 ```
 
 
 
 # LICENSE
 
-CU-Observer's userspace program is licensed under MIT License.  
+safeguard's userspace program is licensed under MIT License.  
 eBPF programs inside [pkg/bpf directory](pkg/bpf) are licensed under [GNU General Public License version 2](./pkg/bpf/LICENSE.md).  

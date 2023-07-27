@@ -25,7 +25,7 @@ struct mount_audit_event {
     unsigned char source_path[NAME_MAX];
 };
 
-struct mount_bouheki_config {
+struct mount_safeguard_config {
     u32 mode;
     u32 target;
 };
@@ -36,7 +36,7 @@ struct {
 	__uint(value_size, sizeof(u32));
 } mount_events SEC(".maps");
 
-BPF_HASH(mount_bouheki_config_map, u32, struct mount_bouheki_config, 256);
+BPF_HASH(mount_safeguard_config_map, u32, struct mount_safeguard_config, 256);
 BPF_HASH(mount_denied_source_list, u32, struct file_path, 256);
 
 static u64 cb_check_path(struct bpf_map *map, u32 *key,
@@ -62,7 +62,7 @@ int BPF_PROG(restricted_mount, const char *dev_name, const struct path *path,
     struct uts_namespace *uts_ns;
     struct mnt_namespace *mnt_ns;
     struct nsproxy *nsproxy;
-    struct mount_bouheki_config *config = (struct mount_bouheki_config *)bpf_map_lookup_elem(&mount_bouheki_config_map, &index);
+    struct mount_safeguard_config *config = (struct mount_safeguard_config *)bpf_map_lookup_elem(&mount_safeguard_config_map, &index);
 
     current_task = (struct task_struct *)bpf_get_current_task();
     struct task_struct *parent_task = BPF_CORE_READ(current_task, real_parent);
