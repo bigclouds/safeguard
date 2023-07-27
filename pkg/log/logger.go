@@ -24,7 +24,7 @@ func NewLogger() *log.Entry {
 }
 
 func logLevel(level string) string {
-	logLevelEnv := os.Getenv("BOUHEKI_LOG")
+	logLevelEnv := os.Getenv("SAFEGUARD_LOG")
 	if logLevelEnv != "" {
 		return logLevelEnv
 	}

@@ -22,7 +22,7 @@ const (
 	TAREGT_CONTAINER uint32 = 1
 
 	// BPF Map Names
-	RESTRICT_NETWORK_CONFIG_MAP_NAME = "network_bouheki_config_map"
+	RESTRICT_NETWORK_CONFIG_MAP_NAME = "network_safeguard_config_map"
 	ALLOWED_V4_CIDR_LIST_MAP_NAME    = "allowed_v4_cidr_list"
 	ALLOWED_V6_CIDR_LIST_MAP_NAME    = "allowed_v6_cidr_list"
 	DENIED_V4_CIDR_LIST_MAP_NAME     = "denied_v4_cidr_list"

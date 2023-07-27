@@ -1,6 +1,6 @@
-# CU-Observer: KRSI(eBPF+LSM) based Linux security auditing tool
+# safeguard: KRSI(eBPF+LSM) based Linux security auditing tool
 
-针对操作系统、内核安全，CU-Observer是一个基于eBPF的Linux审计观测工具，可以实现文件，进程，网络操作的拦截及审计记录。项目采用libbpfgo库，使用go语言实现顶层控制
+针对操作系统、内核安全，safeguard是一个基于eBPF的Linux审计观测工具，可以实现文件，进程，网络操作的拦截及审计记录。项目采用libbpfgo库，使用go语言实现顶层控制
 
 # 特性
 
@@ -58,14 +58,14 @@
 # 编译
 
 ```shell
-$ git clone --recursive https://git.culinux.net/CULinux/CU-Observer.git && cd CU-Observer
+$ git clone --recursive https://git.culinux.net/CULinux/safeguard.git && cd safeguard
 # $ vagrant up && vagrant reload
 # $ vagrant ssh
 
 $ make libbpf-static
 $ make build
 
-sudo ./build/cu-observer --config config/cu_observer.yml |grep BLOCK
+sudo ./build/safeguard --config config/safeguard.yml 
 ```
 
 # 开发路线
@@ -73,5 +73,5 @@ sudo ./build/cu-observer --config config/cu_observer.yml |grep BLOCK
 
 # LICENSE
 
-CU-Observer's userspace program is licensed under MIT License.  
+safeguard's userspace program is licensed under MIT License.  
 eBPF programs inside [pkg/bpf directory](pkg/bpf) are licensed under [GNU General Public License version 2](./pkg/bpf/LICENSE.md).  

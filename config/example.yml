@@ -13,7 +13,7 @@ network:
     allow:
       #- systemd-resolved
       #- curl
-      #- cu-observer
+      #- safeguard
 files:
   enable: false
   mode: block
