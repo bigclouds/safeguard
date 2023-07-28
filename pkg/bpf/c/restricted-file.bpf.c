@@ -47,52 +47,48 @@ BPF_HASH(allowed_access_files, u32, struct file_path, 256);
 BPF_HASH(denied_access_files, u32, struct file_path, 256);
 
 static u64 cb_check_path(struct bpf_map *map, u32 *key, struct file_path *map_path, struct callback_ctx *ctx) {
-    bpf_printk("checking ctx->found: %d, path: map_path: %s, ctx_path: %s", ctx->found, map_path->path, ctx->path);
-
     size_t size = strlen(map_path->path, NAME_MAX);
     if (strcmp(map_path->path, ctx->path, size) == 0) {
-        ctx->found = 1;
+        ctx->found = true;
     }
+    //bpf_printk("checking ctx->found: %d, map_path: %s, ctx_path: %s", ctx->found, map_path->path, ctx->path);
 
     return 0;
 }
 
-SEC("lsm/file_open")
-int BPF_PROG(restricted_file_open, struct file *file)
-{
+void get_file_info(struct file_open_audit_event *event){
     struct task_struct *current_task;
     struct uts_namespace *uts_ns;
     struct mnt_namespace *mnt_ns;
     struct nsproxy *nsproxy;
-    struct file *fp;
-    struct dentry *dentry;
-    const __u8 *filename;
-    struct file_open_audit_event event = {};
-    int index = 0;
-    struct fileopen_safeguard_config *config = (struct fileopen_safeguard_config *)bpf_map_lookup_elem(&fileopen_safeguard_config_map, &index);
-    int ret = -1;
-    unsigned int inum;
 
     current_task = (struct task_struct *)bpf_get_current_task();
     BPF_CORE_READ_INTO(&nsproxy, current_task, nsproxy);
     BPF_CORE_READ_INTO(&uts_ns, nsproxy, uts_ns);
-    BPF_CORE_READ_INTO(&event.nodename, uts_ns, name.nodename);
+    BPF_CORE_READ_INTO(&event->nodename, uts_ns, name.nodename);
     BPF_CORE_READ_INTO(&mnt_ns, nsproxy, mnt_ns);
-    BPF_CORE_READ_INTO(&inum, mnt_ns, ns.inum);
-    //event.cgroup = bpf_get_current_cgroup_id();
-    event.pid = (u32)(bpf_get_current_pid_tgid() >> 32);
-    bpf_get_current_comm(&event.task, sizeof(event.task));
+    // BPF_CORE_READ_INTO(&inum, mnt_ns, ns.inum);
+    //event->cgroup = bpf_get_current_cgroup_id();
+    event->pid = (u32)(bpf_get_current_pid_tgid() >> 32);
+    bpf_get_current_comm(&event->task, sizeof(event->task));
     struct task_struct *parent_task = BPF_CORE_READ(current_task, real_parent);
-    bpf_probe_read_kernel_str(&event.parent_task, sizeof(event.parent_task), &parent_task->comm);
+    bpf_probe_read_kernel_str(&event->parent_task, sizeof(event->parent_task), &parent_task->comm);
     u64 uid_gid = bpf_get_current_uid_gid();
-    event.uid = uid_gid & 0xFFFFFFFF;
-    //event.gid = uid_gid >> 32;
+    event->uid = uid_gid & 0xFFFFFFFF;
+}
 
-    if (bpf_d_path(&file->f_path, (char *)event.path, NAME_MAX) < 0) {
+int get_file_perm(struct file_open_audit_event *event,struct file *file){
+    int ret = -1;
+    int findex = 0;
+    struct fileopen_safeguard_config *config = (struct fileopen_safeguard_config *)bpf_map_lookup_elem(&fileopen_safeguard_config_map, &findex);
+    
+    //bpf_probe_read_user(&event->path, sizeof(event->path), (void *)file->f_path.dentry->d_name.name);
+    if (bpf_d_path(&file->f_path, (char *)event->path, NAME_MAX) < 0) { /* get event->path from file->f_path */
         return 0;
     }
+    //bpf_printk("!!!!!!!!!!bpf_probe_read_user: %s\n", event->path);
 
-    struct callback_ctx cb = { .path = event.path, .found = false};
+    struct callback_ctx cb = { .path = event->path, .found = false};
     cb.found = false;
     bpf_for_each_map_elem(&denied_access_files, cb_check_path, &cb, 0);
     if (cb.found) {
@@ -107,18 +103,54 @@ int BPF_PROG(restricted_file_open, struct file *file)
         goto out;
     }
 
-out:
-    // want to call is_container(), but the stack size is too large to load the BPF program.
-    // We have no choice but to write an equivalent process...
-    if (config && config->target == TARGET_CONTAINER && inum == 0xF0000000) {
-        return 0;
-    }
 
+out:
     if (config && config->mode == MODE_MONITOR) {
         ret = 0;
     }
-
-    event.ret = ret;
-    bpf_perf_event_output((void *)ctx, &fileopen_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
     return ret;
+}
+
+SEC("lsm/file_open")
+int BPF_PROG(restricted_file_open, struct file *file)
+{
+    struct file_open_audit_event event = {};
+    get_file_info(&event);
+    event.ret = get_file_perm(&event, file);
+    bpf_perf_event_output((void *)ctx, &fileopen_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+    return event.ret;
+}
+
+
+SEC("lsm/file_receive")
+int BPF_PROG(restricted_file_receive, struct file *file)
+{
+    struct file_open_audit_event event = {};
+    get_file_info(&event);
+    event.ret = get_file_perm(&event, file);
+    bpf_perf_event_output((void *)ctx, &fileopen_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+    return event.ret;
+}
+
+
+SEC("lsm/mmap_file")
+int BPF_PROG(restricted_mmap_file, struct file *file, unsigned long reqprot,
+             unsigned long prot, unsigned long flags)
+{
+    struct file_open_audit_event event = {};
+    get_file_info(&event);
+    event.ret = get_file_perm(&event, file);
+    bpf_perf_event_output((void *)ctx, &fileopen_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+    return event.ret;
+}
+
+
+SEC("lsm/file_ioctl")
+int BPF_PROG(restricted_file_ioctl, struct file *file, unsigned int cmd, unsigned long arg)
+{
+    struct file_open_audit_event event = {};
+    get_file_info(&event);
+    event.ret = get_file_perm(&event, file);
+    bpf_perf_event_output((void *)ctx, &fileopen_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+    return event.ret;
 }

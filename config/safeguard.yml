@@ -1,5 +1,5 @@
 network:
-  enable: true
+  enable: false
   mode: block
   target: host
   cidr:
@@ -22,11 +22,11 @@ files:
     #- '/'
   deny:
     - '/etc/profile'
-    #- '/etc/passwd'
+    - '/home/vagrant/test'
 mount:
   enable: false
 process:
-  enable: true
+  enable: false
   mode: monitor
   target: host
 

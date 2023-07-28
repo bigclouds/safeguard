@@ -20,7 +20,7 @@ func init() {
 }
 
 func NewLogger() *log.Entry {
-	return log.WithFields(log.Fields{"cu_observer_pid": os.Getpid()})
+	return log.WithFields(log.Fields{"safeguard_pid": os.Getpid()})
 }
 
 func logLevel(level string) string {

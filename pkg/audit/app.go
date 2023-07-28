@@ -21,9 +21,9 @@ import (
 var (
 	configFlag = cli.StringFlag{
 		Name:    "config",
-		Value:   "cu_observer.yaml",
+		Value:   "safeguard.yaml",
 		Usage:   "config file path",
-		EnvVars: []string{"CUOB_CONFIG_PATH"},
+		EnvVars: []string{"SG_CONFIG_PATH"},
 	}
 )
 
