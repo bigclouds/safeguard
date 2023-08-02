@@ -47,17 +47,19 @@ func (m *Manager) Close() {
 }
 
 func (m *Manager) Attach() error {
-	prog, err := m.mod.GetProgram(BPF_PROGRAM_NAME)
-	if err != nil {
-		return err
-	}
+	for _, prog_name := range []string{"restricted_file_open", "restricted_file_receive"} { //, "restricted_mmap_file", "restricted_file_ioctl"} {
+		prog, err := m.mod.GetProgram(prog_name)
+		if err != nil {
+			return err
+		}
 
-	_, err = prog.AttachLSM()
-	if err != nil {
-		return err
-	}
+		_, err = prog.AttachLSM()
+		if err != nil {
+			return err
+		}
 
-	log.Debug(fmt.Sprintf("%s attached.", BPF_PROGRAM_NAME))
+		log.Debug(fmt.Sprintf("%s attached.", prog_name))
+	}
 	return nil
 }
 
