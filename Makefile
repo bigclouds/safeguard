@@ -49,7 +49,7 @@ vmlinux:
 .PHONY: build
 build: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process
 	mkdir -p build
-	$(CGOFLAG) go build -tags netgo -ldflags '-w -s -extldflags "-static"' -o build/safeguard cmd/cuob/safeguard.go
+	$(CGOFLAG) go build -tags netgo -ldflags '-w -s -extldflags "-static"' -o build/safeguard cmd/safeguard/safeguard.go
 
 
 .PHONY: build/docker
