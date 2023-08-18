@@ -142,21 +142,17 @@ static inline bool is_destination_port_zero_v6(struct sockaddr_in6 *inet_addr) {
   return __builtin_bswap16(inet_addr->sin6_port) == 0;
 }
 
-// TODO: lsm/send_msg
-SEC("lsm/socket_connect")
-int BPF_PROG(socket_connect, struct socket *sock, struct sockaddr *address,
-             int addrlen) {
+static inline int get_net_perm(struct network_safeguard_config *c, struct sockaddr *address){
   int allow_connect = -EPERM;
   int allow_command = -EPERM;
   int allow_uid = -EPERM;
   int allow_gid = -EPERM;
+
   bool is_ipv6 = (address->sa_family == AF_INET6);
   bool is_ipv4 = (address->sa_family == AF_INET);
 
   if (!(is_ipv4 || is_ipv6))
     return 0;
-
-  u64 cg = bpf_get_current_cgroup_id();
 
   struct sockaddr_in *inet_addr4;
   struct sockaddr_in6 *inet_addr6;
@@ -193,11 +189,6 @@ int BPF_PROG(socket_connect, struct socket *sock, struct sockaddr *address,
   denied_uid.uid = (unsigned)(bpf_get_current_uid_gid() & 0xffffffff);
   allowed_gid.gid = (unsigned)(bpf_get_current_uid_gid() >> 32);
   denied_gid.gid = (unsigned)(bpf_get_current_uid_gid() >> 32);
-
-  u32 index = 0;
-
-  struct network_safeguard_config *c =
-      (struct network_safeguard_config *)bpf_map_lookup_elem(&network_safeguard_config_map, &index);
 
   // Redundant by BPF constraints...
   int has_allow_command = 0;
@@ -278,6 +269,28 @@ int BPF_PROG(socket_connect, struct socket *sock, struct sockaddr *address,
     can_access = 0;
   }
 
+  if(c && c->mode == MODE_MONITOR){
+    return 0;
+  }
+  return can_access;
+} 
+
+static inline void reoprt_net_events(struct network_safeguard_config *c, int can_access, unsigned long long *ctx, 
+                                    struct socket *sock, struct sockaddr *address){
+  bool is_ipv6 = (address->sa_family == AF_INET6);
+  bool is_ipv4 = (address->sa_family == AF_INET);
+
+  u64 cg = bpf_get_current_cgroup_id();
+
+  struct sockaddr_in *inet_addr4;
+  struct sockaddr_in6 *inet_addr6;
+
+  if (is_ipv6) {
+    inet_addr6 = (struct sockaddr_in6 *)address;
+  } else {
+    inet_addr4 = (struct sockaddr_in *)address;
+  }
+
   if (can_access != 0 && c && c->mode == MODE_BLOCK) {
     if (is_ipv4) {
       report_ipv4_event((void *)ctx, cg, ACTION_BLOCK, CONNECT, sock,
@@ -296,8 +309,32 @@ int BPF_PROG(socket_connect, struct socket *sock, struct sockaddr *address,
       report_ipv6_event((void *)ctx, cg, ACTION_MONITOR, CONNECT, sock,
                         inet_addr6);
     }
-    return 0;
   }
+}
 
+// TODO: lsm/send_msg
+SEC("lsm/socket_connect")
+int BPF_PROG(socket_connect, struct socket *sock, struct sockaddr *address,
+             int addrlen) {   
+  u32 index = 0;
+  struct network_safeguard_config *c =
+      (struct network_safeguard_config *)bpf_map_lookup_elem(&network_safeguard_config_map, &index);
+
+  int can_access = get_net_perm(c, address);
+  reoprt_net_events(c, can_access, ctx, sock, address);
   return can_access;
 }
+
+SEC("lsm/socket_bind")
+int BPF_PROG(socket_bind, struct socket *sock, struct sockaddr *address,
+             int addrlen) {
+  u32 index = 0;
+  struct network_safeguard_config *c =
+      (struct network_safeguard_config *)bpf_map_lookup_elem(&network_safeguard_config_map, &index);
+
+  int can_access = get_net_perm(c, address);
+  reoprt_net_events(c, can_access, ctx, sock, address);
+  return can_access;
+}
+
+

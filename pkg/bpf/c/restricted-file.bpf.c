@@ -56,7 +56,7 @@ static u64 cb_check_path(struct bpf_map *map, u32 *key, struct file_path *map_pa
     return 0;
 }
 
-void get_file_info(struct file_open_audit_event *event){
+static inline void get_file_info(struct file_open_audit_event *event){
     struct task_struct *current_task;
     struct uts_namespace *uts_ns;
     struct mnt_namespace *mnt_ns;
@@ -77,7 +77,7 @@ void get_file_info(struct file_open_audit_event *event){
     event->uid = uid_gid & 0xFFFFFFFF;
 }
 
-int get_file_perm(struct file_open_audit_event *event,struct file *file){
+static inline int get_file_perm(struct file_open_audit_event *event,struct file *file){
     int ret = -1;
     int findex = 0;
     struct fileopen_safeguard_config *config = (struct fileopen_safeguard_config *)bpf_map_lookup_elem(&fileopen_safeguard_config_map, &findex);
