@@ -13,7 +13,7 @@ Periodically resolves domain names and updates IP addresses in the Allow / Deny 
 
 ## Change DNS Server (Recommend)
 
-If `dns_proxy` is enabled, CUOB will start DNS Proxy. Specify `127.0.0.1` and `172.17.0.1` (default bridge for docker) for `nameserver` in `/etc/resolv.conf`.
+If `dns_proxy` is enabled, safeguard will start DNS Proxy. Specify `127.0.0.1` and `172.17.0.1` (default bridge for docker) for `nameserver` in `/etc/resolv.conf`.
 If the domain to be name resolved is restricted, update the IP address in the Allow / Deny list.
 
 

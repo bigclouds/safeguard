@@ -43,7 +43,7 @@ network:
 
 #### Block connections to the specified domain
 
-Block connections to `example.com`. bouheki periodically looks up IP addresses, so it keeps up with IP address changes.
+Block connections to `example.com`. safeguard periodically looks up IP addresses, so it keeps up with IP address changes.
 
 ```yaml
 network:

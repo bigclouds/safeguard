@@ -65,7 +65,7 @@ $ git clone --recursive https://git.culinux.net/CULinux/safeguard.git && cd safe
 $ make libbpf-static
 $ make build
 
-sudo ./build/safeguard --config config/safeguard.yml #|grep BLOCK
+$ sudo ./build/safeguard --config config/safeguard.yml #|grep BLOCK
 ```
 
 # 开发路线

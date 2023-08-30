@@ -17,7 +17,7 @@ network:
     allow:
       - systemd-resolved
       - curl
-      - bouheki
+      - safeguard
 files:
   mode: block
   target: host
@@ -40,7 +40,14 @@ For more information for configurations, see [here](../configuration/network-res
 ## Run
 
 ```shell
-$ sudo bouheki --config example.yml
+git clone --recursive https://git.culinux.net/CULinux/safeguard.git && cd safeguard
+$ vagrant up && vagrant reload
+$ vagrant ssh
+
+$ make libbpf-static
+$ make build
+
+$ sudo ./build/safeguard --config config/safeguard.yml #|grep BLOCK
 ```
 
 ### Docker

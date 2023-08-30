@@ -2,17 +2,17 @@
 
 In recent years, there have been many incidents of credentials being compromised from CI / CD environments due to supply chain attacks.  
 Prevent against supply chain attacks signature and hash verification, and more, but restrict egress is another measure that should be taken.
-bouheki can be installed in a CI/CD environment to restrict network communication by domain name or process name.
+safeguard can be installed in a CI/CD environment to restrict network communication by domain name or process name.
 
 ## Hardening GitHub Actions Self-hosted Runner
 
 Hardening a Workflow running on GitHub Actions Self-hosted Runner is done in the following steps:
 
-### 1. Install bouheki
+### 1. Install safeguard
 
-Install bouheki with reference to [Installation](../getting-started/installation.md).
+Install safeguard with reference to [Installation](../getting-started/installation.md).
 
-### 2. Create the bouheki configuration file
+### 2. Create the safeguard configuration file
 
 ```yaml
 network:
@@ -42,8 +42,8 @@ log:
 
 ### 3. Change the DNS Server to be used
 
-Change `/etc/resolv.conf` to use bouheki's DNS Proxy.  
-bouheki DNS Proxy also listens on `172.17.0.1`, this default bridge for Docker; this IP address must also be specified in the `nameserver` so that the Docker container can resolve names.
+Change `/etc/resolv.conf` to use safeguard's DNS Proxy.  
+safeguard DNS Proxy also listens on `172.17.0.1`, this default bridge for Docker; this IP address must also be specified in the `nameserver` so that the Docker container can resolve names.
 
 ```shell
 $ cat /etc/resolv.conf
@@ -61,10 +61,3 @@ DNS=127.0.0.1 172.17.0.1
 
 # systemctl restart systemd-resolved
 ```
-
-### 4. Execute the Actions Workflow
-
-!!! warning
-    WIP
-
-https://github.com/mrtc0/bouheki-runner allows you to restrict access to per Workflows.

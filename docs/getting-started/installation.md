@@ -2,7 +2,7 @@
 
 ## Requirements
 
-* Linux Kernel >= 5.8.0
+* Linux Kernel >= 5.13.0
   * BTF(`CONFIG_DEBUG_INFO_BTF`) must be enabled.
   * BPF LSM(`CONFIG_LSM` with `bpf`) must be enabled. This parameter can also be changed in the boot parameter.
 
@@ -49,7 +49,8 @@ sudo update-grub2
 Download latest released binary from https://github.com/mrtc0/bouheki/releases
 
 ```shell
-$ wget https://github.com/mrtc0/bouheki/releases/download/v0.0.3/bouheki_0.0.3_Linux_x86_64.tar.gz
-$ tar xzf bouhki_0.0.3_Linux_x86_64.tar.gz
-$ sudo install bouheki /usr/local/bin/bouheki
+$ make libbpf-static
+$ make build
+
+$ sudo ./build/safeguard --config config/safeguard.yml #|grep BLOCK
 ```

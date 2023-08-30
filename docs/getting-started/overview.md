@@ -1,17 +1,17 @@
 # Overview
 
-CUOB detects (and prevents) two type of security events:
+safeguard detects (and prevents) two type of security events:
 
 - [Network Access](../configuration/network-restriction/configuration.md)
 - [File Access](../configuration/file-access-restriction/configuration.md)
 - [Mount](../configuration//mount-restriction/configuration.md)
 
-CUOB can choose between the following two restriction target:
+safeguard can choose between the following two restriction target:
 
 - Host-wide
 - Container Only
 
-CUOB can be run in two modes:
+safeguard can be run in two modes:
 
 - Monitor Mode
 - Block Mode
