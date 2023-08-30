@@ -1,4 +1,4 @@
-# safeguard: KRSI(eBPF+LSM) based Linux security auditing tool
+# safeguard: Linux security audit, control, and behavior analysis tools based on KRSI(eBPF+LSM)
 
 针对操作系统、内核安全，safeguard是一个基于eBPF的Linux审计观测工具，可以实现文件，进程，网络操作的拦截及审计记录。项目采用libbpfgo库，使用go语言实现顶层控制
 
