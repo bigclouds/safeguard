@@ -1,6 +1,6 @@
-# CUlinux-observer: KRSI(eBPF+LSM) based Linux security auditing tool
+# safeguard: KRSI(eBPF+LSM) based Linux security auditing tool
 
-CUlinux-observer(CUOB) is KRSI(eBPF+LSM) based Linux security auditing tool.  
+safeguard is KRSI(eBPF+LSM) based Linux security auditing tool.  
 Security events can be audited and blocked based on the container of the process, and restrictions can be applied to container environments.
 
 # Features
@@ -13,5 +13,5 @@ Security events can be audited and blocked based on the container of the process
 
 # LICENSE
 
-CUOB's userspace program is licensed under MIT License.  
+safeguard's userspace program is licensed under Apache License 2.0 License.  
 eBPF programs inside [pkg/bpf directory](pkg/bpf) are licensed under [GNU General Public License version 2](./pkg/bpf/LICENSE.md).  

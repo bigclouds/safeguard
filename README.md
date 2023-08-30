@@ -10,7 +10,7 @@
 
 ![architecture.jpeg](docs/architecture.jpeg)
 
-# 项目功能
+# 项目功能(部分在开发阶段)
 
 ## 文件
 
@@ -70,8 +70,9 @@ $ sudo ./build/safeguard --config config/safeguard.yml #|grep BLOCK
 
 # 开发路线
 ![Alt text](docs/dev-route.jpeg)
+蓝色为部分完成，橙色待开发
 
 # LICENSE
 
-safeguard's userspace program is licensed under MIT License.  
+safeguard's userspace program is licensed under Apache License 2.0 License.  
 eBPF programs inside [pkg/bpf directory](pkg/bpf) are licensed under [GNU General Public License version 2](./pkg/bpf/LICENSE.md).  

@@ -1,6 +1,6 @@
 # Configuration
 
-CUOB's configuration file is a YAML file containing a collection of `key: value` or `key: [value list]` pairs.
+safeguard's configuration file is a YAML file containing a collection of `key: value` or `key: [value list]` pairs.
 
 ## Current configuration options
 

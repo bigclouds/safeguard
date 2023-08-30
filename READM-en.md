@@ -28,5 +28,5 @@ sudo ./build/safeguard --config config/safeguard.yml #|grep BLOCK
 
 # LICENSE
 
-safeguard's userspace program is licensed under MIT License.  
+safeguard's userspace program is licensed under Apache License 2.0 License.  
 eBPF programs inside [pkg/bpf directory](pkg/bpf) are licensed under [GNU General Public License version 2](./pkg/bpf/LICENSE.md).  

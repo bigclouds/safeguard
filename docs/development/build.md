@@ -3,7 +3,7 @@
 ```shell
 $ vagrant ssh
 
-$ cd /vagrant/CUOB
+$ cd /vagrant/safeguard
 $ make libbpf-static
 $ make build
 ```

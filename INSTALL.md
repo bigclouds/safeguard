@@ -1,4 +1,4 @@
-# Installing CUOB
+# Installing safeguard
 
 ## Kernel Configuration
 
