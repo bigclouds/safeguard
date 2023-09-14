@@ -52,7 +52,7 @@ add_process_to_map(struct process_info *info)
     if (!process)
         return NULL;
     
-    bpf_printk("process info: %d; %d; %s", process->pid, process->ppid, process->comm);
+    //bpf_printk("process info: %d; %d; %s", process->pid, process->ppid, process->comm);
 
     return process;
 }
