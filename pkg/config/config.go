@@ -7,6 +7,13 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type RestrictedProcessInterceptionConfig struct {
+	Enable bool
+	Mode   string `yaml:"mode"`
+	Target string `yaml:"target"`
+
+	Deny []string `yaml:"deny"`
+}
 type RestrictedNetworkConfig struct {
 	Enable  bool
 	Mode    string        `yaml:"mode"`
@@ -83,12 +90,13 @@ type LogConfig struct {
 }
 
 type Config struct {
-	RestrictedNetworkConfig    `yaml:"network"`
-	RestrictedFileAccessConfig `yaml:"files"`
-	RestrictedMountConfig      `yaml:"mount"`
-	RestrictedProcessConfig    `yaml:"process"`
-	DNSProxyConfig             `yaml:"dns_proxy"`
-	Log                        LogConfig
+	RestrictedNetworkConfig             `yaml:"network"`
+	RestrictedFileAccessConfig          `yaml:"files"`
+	RestrictedMountConfig               `yaml:"mount"`
+	RestrictedProcessConfig             `yaml:"process"`
+	DNSProxyConfig                      `yaml:"dns_proxy"`
+	RestrictedProcessInterceptionConfig `yaml:"process_interception"`
+	Log                                 LogConfig
 }
 
 func DefaultConfig() *Config {
@@ -127,6 +135,12 @@ func DefaultConfig() *Config {
 			Enable:        false,
 			Upstreams:     []string{},
 			BindAddresses: []string{"127.0.0.1", "172.17.0.1"},
+		},
+		RestrictedProcessInterceptionConfig: RestrictedProcessInterceptionConfig{
+			Enable: true,
+			Mode:   "check",
+			Target: "host",
+			Deny:   []string{"/"},
 		},
 		Log: LogConfig{
 			Level:  "INFO",
@@ -197,6 +211,12 @@ func (c *Config) IsRestrictedMode(target string) bool {
 		} else {
 			return false
 		}
+	case "processinterception":
+		if c.RestrictedProcessInterceptionConfig.Mode == "block" {
+			return true
+		} else {
+			return false
+		}
 	default:
 		return false
 	}
@@ -224,6 +244,12 @@ func (c *Config) IsOnlyContainer(target string) bool {
 		}
 	case "process":
 		if c.RestrictedMountConfig.Target == "container" {
+			return true
+		} else {
+			return false
+		}
+	case "process_interception":
+		if c.RestrictedProcessInterceptionConfig.Target == "container" {
 			return true
 		} else {
 			return false
