@@ -42,12 +42,15 @@ bpf-restricted-mount: $(BPF_BUILDDIR)/restricted-mount.bpf.o
 .PHONY: bpf-restricted-process
 bpf-restricted-process: $(BPF_BUILDDIR)/restricted-process.bpf.o
 
+.PHONY: bpf-restricted-processinterception
+bpf-restricted-processinterception: $(BPF_BUILDDIR)/restricted-processinterception.bpf.o
+
 .PHONY: vmlinux
 vmlinux:
 	$(shell bpftool btf dump file /sys/kernel/btf/vmlinux format c > vmlinux.h)
 
 .PHONY: build
-build: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process
+build: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process bpf-restricted-processinterception
 	mkdir -p build
 	$(CGOFLAG) go build -tags netgo -ldflags '-w -s -extldflags "-static"' -o build/safeguard cmd/safeguard/safeguard.go
 
@@ -57,17 +60,17 @@ build/docker:
 	sudo docker build -t ghcr.io/mrtc0/bouheki:latest .
 
 .PHONY: test/unit
-test/unit: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process
+test/unit: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process bpf-restricted-processinterception
 	which gotestsum || go install gotest.tools/gotestsum@latest
 	$(CGOFLAG) sudo -E gotestsum -- --mod=vendor -bench=^$$ -race ./...
 
 .PHONY: test
-test: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process
+test: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process bpf-restricted-processinterception
 	which gotestsum || go install gotest.tools/gotestsum@latest
 	$(CGOFLAG) sudo -E gotestsum -- --tags=integration --mod=vendor -bench=^$$ -race ./...
 
 .PHONY: test/integration/specify
-test/integration/specify: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process
+test/integration/specify: bpf-restricted-network bpf-restricted-file bpf-restricted-mount bpf-restricted-process bpf-restricted-processinterception
 	which gotestsum || go install gotest.tools/gotestsum@latest
 	$(CGOFLAG) sudo -E go test -tags integration -run ${NAME} ./...
 

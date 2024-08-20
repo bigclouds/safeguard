@@ -143,6 +143,10 @@ type RestrictedProcessLog struct {
 	AuditEventLog
 	PPID uint32
 }
+type RestrictedProcessinterceptionLog struct {
+	AuditEventLog
+	Path string
+}
 
 func (l *RestrictedNetworkLog) Info() {
 	Logger.WithFields(logrus.Fields{
@@ -156,6 +160,27 @@ func (l *RestrictedNetworkLog) Info() {
 		"Port":       l.Port,
 		"Protocol":   l.Protocol,
 	}).Info("Traffic is trapped in the filter.")
+}
+
+func (l *RestrictedProcessinterceptionLog) Info() {
+	Logger.WithFields(logrus.Fields{
+		"Action": l.Action,
+		// "Hostname": l.Hostname,
+		"PID": l.PID,
+		"UID": l.UID,
+		"UName": func(UID uint32) string {
+			u, err := user.LookupId(strconv.FormatUint(uint64(UID), 10))
+			if err != nil {
+				return "Nan"
+			} else {
+				return u.Username
+			}
+		}(l.UID),
+		"Comm": l.Comm,
+		// "ParentComm": l.ParentComm,
+		"Path": l.Path,
+		//		"FormSourcePath": l.FromSourcePath,
+	}).Info("Processinterception event is trapped in the filter.")
 }
 
 func (l *RestrictedFileAccessLog) Info() {
