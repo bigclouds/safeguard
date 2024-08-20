@@ -2,6 +2,7 @@ package audit
 
 import (
 	"context"
+	"culinux/pkg/audit/processinterception"
 	"errors"
 	"os"
 	"os/signal"
@@ -58,13 +59,13 @@ func NewApp(version string) *cli.App {
 		defer cancel()
 
 		var wg sync.WaitGroup
-		wg.Add(4)
+		wg.Add(5)
 
 		go fileaccess.RunAudit(ctx, &wg, conf)
 		go network.RunAudit(ctx, &wg, conf)
 		go process.RunAudit(ctx, &wg, conf)
 		go mount.RunAudit(ctx, &wg, conf)
-
+		go processinterception.RunAudit(ctx, &wg, conf)
 		wg.Wait()
 		log.Info("Terminate all audit.")
 		return nil

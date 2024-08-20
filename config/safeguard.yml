@@ -32,3 +32,9 @@ log:
   level: info
   format: json
 
+process_interception:
+  enable: true
+  mode: block
+  target: host
+  deny:
+    - '/home/mm'
