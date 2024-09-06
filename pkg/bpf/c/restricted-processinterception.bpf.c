@@ -246,7 +246,7 @@ static inline int check_path_hooks(struct path *f_path,struct processinterceptio
                     find = true;
                 }
                 equali = equali + 1;
-                if (paths->path[equali + 1] == '|' && find == true) {
+                if (paths->path[equali] == '|' && find == true && (store->path[j] == '\0' || store->path[j] == '/')) {
                       ret = -EPERM;
                       break;
                 }
