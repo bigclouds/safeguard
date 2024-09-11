@@ -48,7 +48,7 @@ func (m *Manager) Close() {
 }
 
 func (m *Manager) Attach() error {
-	for _, prog_name := range []string{"processinterception_mkdir", "processinterception_rmdir"} {
+	for _, prog_name := range []string{"processinterception_mkdir", "processinterception_rmdir", "processinterception_unlink", "processinterception_rename", "processinterception_truncate", "processinterception_chmod", "processinterception_chroot", "processinterception_mknod", "processinterception_symlink", "processinterception_link"} {
 		prog, err := m.mod.GetProgram(prog_name)
 		if err != nil {
 			return err
