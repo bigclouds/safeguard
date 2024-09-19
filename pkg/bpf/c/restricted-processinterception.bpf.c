@@ -246,7 +246,7 @@ static inline int check_path_hooks(struct path *f_path,struct processinterceptio
                     find = true;
                 }
                 equali = equali + 1;
-                if (paths->path[equali + 1] == '|' && find == true) {
+                if (paths->path[equali] == '|' && find == true && (store->path[j] == '\0' || store->path[j] == '/')) {
                       ret = -EPERM;
                       break;
                 }
@@ -314,6 +314,98 @@ int BPF_PROG(processinterception_rmdir, struct path *dir, struct dentry *dentry)
   struct path f_path;
   f_path.dentry = dentry;
   f_path.mnt = BPF_CORE_READ(dir, mnt);
+
+  struct processinterception_event event = {};
+  event.ret = check_path_hooks(&f_path, &event);
+  get_event_info(&event);
+  bpf_perf_event_output((void *)ctx, &processinterception_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+  return event.ret;
+}
+
+SEC("lsm/path_unlink")
+int BPF_PROG(processinterception_unlink, struct path *dir, struct dentry *dentry) {
+  struct path f_path;
+  f_path.dentry = dentry;
+  f_path.mnt = BPF_CORE_READ(dir, mnt);
+
+  struct processinterception_event event = {};
+  event.ret = check_path_hooks(&f_path, &event);
+  get_event_info(&event);
+  bpf_perf_event_output((void *)ctx, &processinterception_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+  return event.ret;
+}
+
+SEC("lsm/path_rename")
+int BPF_PROG(processinterception_rename, struct path *old_dir, struct dentry *old_dentry, struct path *new_dir, struct dentry *new_dentry) {
+  struct path f_path;
+  f_path.dentry = old_dentry;
+  f_path.mnt = BPF_CORE_READ(old_dir, mnt);
+
+  struct processinterception_event event = {};
+  event.ret = check_path_hooks(&f_path, &event);
+  get_event_info(&event);
+  bpf_perf_event_output((void *)ctx, &processinterception_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+  return event.ret;
+}
+
+SEC("lsm/path_truncate")
+int BPF_PROG(processinterception_truncate, struct path *path) {
+  struct processinterception_event event = {};
+  event.ret = check_path_hooks(path, &event);
+  get_event_info(&event);
+  bpf_perf_event_output((void *)ctx, &processinterception_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+  return event.ret;
+}
+
+SEC("lsm/path_chmod")
+int BPF_PROG(processinterception_chmod, struct path *path, umode_t mode) {
+  struct processinterception_event event = {};
+  event.ret = check_path_hooks(path, &event);
+  get_event_info(&event);
+  bpf_perf_event_output((void *)ctx, &processinterception_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+  return event.ret;
+}
+
+SEC("lsm/path_chroot")
+int BPF_PROG(processinterception_chroot, struct path *path) {
+  struct processinterception_event event = {};
+  event.ret = check_path_hooks(path, &event);
+  get_event_info(&event);
+  bpf_perf_event_output((void *)ctx, &processinterception_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+  return event.ret;
+}
+
+SEC("lsm/path_mknod")
+int BPF_PROG(processinterception_mknod, struct path *dir, struct dentry *dentry, umode_t mode, unsigned int dev) {
+  struct path f_path;
+  f_path.dentry = dentry;
+  f_path.mnt = BPF_CORE_READ(dir, mnt);
+
+  struct processinterception_event event = {};
+  event.ret = check_path_hooks(&f_path, &event);
+  get_event_info(&event);
+  bpf_perf_event_output((void *)ctx, &processinterception_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+  return event.ret;
+}
+
+SEC("lsm/path_symlink")
+int BPF_PROG(processinterception_symlink, struct path *dir, struct dentry *dentry, char *old_name) {
+  struct path f_path;
+  f_path.dentry = dentry;
+  f_path.mnt = BPF_CORE_READ(dir, mnt);
+
+  struct processinterception_event event = {};
+  event.ret = check_path_hooks(&f_path, &event);
+  get_event_info(&event);
+  bpf_perf_event_output((void *)ctx, &processinterception_events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+  return event.ret;
+}
+
+SEC("lsm/path_link")
+int BPF_PROG(processinterception_link, struct dentry *old_dentry, struct path *new_dir, struct dentry *new_dentry) {
+  struct path f_path;
+  f_path.dentry = new_dentry;
+  f_path.mnt = BPF_CORE_READ(new_dir, mnt);
 
   struct processinterception_event event = {};
   event.ret = check_path_hooks(&f_path, &event);
