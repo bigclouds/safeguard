@@ -21,7 +21,7 @@ import (
 
 const (
 	BPF_OBJECT_NAME  = "restricted-mount"
-	MODULE = "module"
+	MODULE = "mount"
 
 	NEW_UTS_LEN   = 64
 	TASK_COMM_LEN = 16
